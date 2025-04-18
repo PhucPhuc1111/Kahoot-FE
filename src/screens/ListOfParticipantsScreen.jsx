@@ -26,7 +26,7 @@ const fakePlayers = [
   { name: "Nina" },
 ];
 
-const WaitRoomScreen = () => {
+const ListOfParticipantsScreen = () => {
   const roomCode = "123456";
 
   return (
@@ -189,4 +189,4 @@ const WaitRoomScreen = () => {
   );
 };
 
-export default WaitRoomScreen;
+export default ListOfParticipantsScreen;
