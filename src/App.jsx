@@ -12,7 +12,7 @@ import LeaderBoardScreen from "./screens/LeaderBoardScreen";
 function App() {
   return (
     <div className="App">
-      <Header />
+
       <Router>
         <Routes>
           <Route path="/createK" element={<CreateKahoot />} />

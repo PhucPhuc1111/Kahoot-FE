@@ -1,6 +1,8 @@
 import React, { state, useState, useEffect } from "react";
 import { Input, notification, Upload, Checkbox, Button, Popover } from "antd";
 import { UploadOutlined } from '@ant-design/icons';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+
 import '../components/CreateQuestion.css';
 
 const CreateQuestion = () => {
@@ -40,11 +42,8 @@ const CreateQuestion = () => {
 
     const handleDuplicateAnswer = (id) => {
         const answerToDuplicate = answers.find((answer) => answer.id === id);
-        if (!answerToDuplicate) {
-            console.error("Invalid answer id:", id);
-            return;
-        }
-        const newAnswer = { ...answerToDuplicate, id: Date.now() }; // Tạo id mới bằng Date.now
+
+        const newAnswer = { ...answerToDuplicate, id: Date.now() };
         setAnswers([...answers, newAnswer]);
     };
     const handleSaveQuestion = () => {
@@ -131,6 +130,14 @@ const CreateQuestion = () => {
         console.log("LOG:", newQuestion);
         console.log("LOG:", savedQuestions);
     }
+    const handleDragEnd = (result) => {
+        if (!result.destination) return;
+        const items = Array.from(savedQuestions);
+        const [reorderedItem] = items.splice(result.source.index, 1);
+        items.splice(result.destination.index, 0, reorderedItem);
+        setSavedQuestions(items);
+        console.log("LOG:", items);
+    }
     const handleDeleteQuestion = (id) => {
         const newSavedQuestions = savedQuestions.filter((question) => question.id !== id);
         setSavedQuestions(newSavedQuestions);
@@ -139,42 +146,47 @@ const CreateQuestion = () => {
 
     return (
         <div >
-            <div style={{ display: "flex" }}>
-                <div style={{
-                    width: "300px",
-                    backgroundColor: "#f7f7f7",
-                    padding: "20px",
-                    borderRadius: "20px",
-                    marginTop: "100px"
-                }}>
-                    <h2 style={{ color: "black" }}>Saved Questions</h2>
 
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                        {savedQuestions.map((q, index) => (
-                            <div key={q.id}
-                                onClick={() => handleSelectQuestion(q)}
-                                className="custom-button"
-                                style={{
-                                    backgroundColor: "#ffffff",
-                                    padding: "10px",
-                                    borderRadius: "10px",
-                                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                                    cursor: "pointer",
-                                    color: "black",
-                                    transition: "all 0.3s ease",
-                                }}>
-                                {`Question ${index + 1}: ${q.content}`}<br />
-                                <Button
-                                    className="custom-button"
-                                    size="small"
-                                    style={{ backgroundColor: "red", color: "white", marginLeft: "10px" }}
-                                    onClick={() => handleDeleteQuestion(q.id)}
-                                >Delete</Button>
-                            </div>
-                        ))}
-                        <button className="custom-button" onClick={handleAddQuestion}>+ More Question</button>
+            <div style={{ display: "flex" }}>
+                <DragDropContext onDragEnd={(result) => { handleDragEnd(result) }}>
+                    <div style={{
+                        width: "300px",
+                        backgroundColor: "#f7f7f7",
+                        padding: "20px",
+                        borderRadius: "20px",
+                        marginTop: "100px"
+                    }}>
+                        <h2 style={{ color: "black" }}>Saved Questions</h2>
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                            {savedQuestions.map((q, index) => (
+                                <Draggable key={q.id} index={index} draggableId={q.id}>
+                                    {(provided) => (
+                                        <div ref={provided.innerRef}{...provided.droppableProps}
+                                            onClick={() => handleSelectQuestion(q)}
+                                            className="custom-button"
+                                            style={{
+                                                backgroundColor: "#ffffff",
+                                                padding: "10px",
+                                                borderRadius: "10px",
+                                                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                                                cursor: "pointer",
+                                                color: "black",
+                                                transition: "all 0.3s ease",
+                                            }}>
+                                            {`Question ${index + 1}: ${q.content}`}<br />
+                                            <Button
+                                                className="custom-button"
+                                                size="small"
+                                                style={{ backgroundColor: "red", color: "white", marginLeft: "10px" }}
+                                                onClick={() => handleDeleteQuestion(q.id)}
+                                            >Delete</Button>
+                                        </div>)}
+                                </Draggable>))}
+                            <button className="custom-button" onClick={handleAddQuestion}>+ More Question</button>
+                        </div>
                     </div>
-                </div>
+                </DragDropContext>
                 < div style={{ margin: "100px", padding: "50px", borderRadius: "30px", backgroundColor: "#f0f2f5" }}>
 
                     <form style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "50px" }}>

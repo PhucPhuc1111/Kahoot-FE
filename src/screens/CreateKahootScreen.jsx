@@ -69,6 +69,7 @@ const CreateKahoot = () => {
                     style={{
                         width: "300px",
                         height: "100px",
+                        color: "black",
                         textAlign: 'left',
                         padding: '10px',
                         backgroundColor: "#f0f0f0",
