@@ -81,12 +81,13 @@ const UserManagement = () => {
   };
 
   const columns = [
-    { title: "Tên", dataIndex: "name", key: "name" },
+    { title: "Name", dataIndex: "name", key: "name" },
     { title: "Email", dataIndex: "email", key: "email" },
-    { title: "Vai trò", dataIndex: "role", key: "role" },
+    { title: "Role", dataIndex: "role", key: "role" },
     {
-      title: "Hành động",
+      title: "Action",
       key: "action",
+      width: 150,
       render: (_, record) => (
         <Space>
           <Button
@@ -94,7 +95,7 @@ const UserManagement = () => {
             onClick={() => showEditModal(record)}
             style={{ borderColor: "#ff85a1", color: "#d81b60" }}
           >
-            Sửa
+            Edit
           </Button>
           <Popconfirm
             title="Bạn có chắc muốn xóa người dùng này không?"
@@ -103,7 +104,7 @@ const UserManagement = () => {
             cancelText="Không"
           >
             <Button danger icon={<DeleteOutlined />}>
-              Xóa
+              Delete
             </Button>
           </Popconfirm>
         </Space>
