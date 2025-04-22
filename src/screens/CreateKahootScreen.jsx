@@ -1,5 +1,7 @@
-import Title from "antd/es/skeleton/Title";
+import { Button, Upload } from "antd";
 import { useState } from "react";
+import { UploadOutlined } from '@ant-design/icons';
+import '../components/CreateQuestion.css';
 import React from 'react';
 
 const CreateKahoot = () => {
@@ -62,6 +64,29 @@ const CreateKahoot = () => {
                     padding="10px"
                     height="80px"
                 />
+                <Upload
+                    accept=".pdf, .doc, .png, .jpg, .jpeg"
+                    onChange={(info) => handleChangeFile(info.file)}
+                    maxCount={1}
+                    beforeUpload={() => false}  //
+                    style={{ width: "200px" }}
+                >
+                    <Button
+                        style={{
+                            width: "300px",
+                            height: "50px",
+                            backgroundColor: "pink",
+                            color: "black",
+                            borderRadius: "5px",
+                            margin: "10px",
+                        }}
+                        icon={<UploadOutlined />}
+                        className="text-input"
+
+                    >
+                        Click to Upload Kahoot Image
+                    </Button>
+                </Upload>
                 <textarea
                     placeholder="Description"
                     required
@@ -79,6 +104,7 @@ const CreateKahoot = () => {
                     onChange={handleOnChangeDes}
 
                 ></textarea>
+
 
                 <button type="submit">Create Kahoot</button>
             </form>

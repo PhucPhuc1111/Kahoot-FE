@@ -17,12 +17,20 @@ const CreateQuestion = () => {
     const [savedQuestions, setSavedQuestions] = useState([]);
     const handleAddAnswer = () => {
         console.log("LOG:", answers);
-        const newAnswer = {
-            id: Date.now(),
-            content: '',
-            isAnswer: false
+        if (answers.length >= 4) {
+            notification.error({
+                message: 'Số lượng câu trả lời tối đa là 4',
+                description: 'Vui lòng nhập nội dung câu hỏi.',
+                placement: 'topRight'
+            });
+        } else {
+            const newAnswer = {
+                id: Date.now(),
+                content: '',
+                isAnswer: false
+            }
+            setAnswers([...answers, newAnswer]);
         }
-        setAnswers([...answers, newAnswer]);
 
     }
     const handleToggleCheckbox = (id, isChecked) => {
@@ -230,7 +238,7 @@ const CreateQuestion = () => {
                         <h3 style={headerStyle}>Upload File </h3>
                         <Upload
                             accept=".pdf, .doc, .png, .jpg, .jpeg"
-                            onChange={(info) => handleChangeFile(info.file)}
+                            onChange={(info) => handleImportFile(info.file)}
                             maxCount={1}
                             beforeUpload={() => false}  //
                             style={{ width: "100%" }}
@@ -243,6 +251,24 @@ const CreateQuestion = () => {
                             >
                                 Click to Upload
                             </Button>
+
+                        </Upload>
+                        <Upload
+                            accept=".xls, .xl"
+                            onChange={(info) => handleChangeFile(info.file)}
+                            maxCount={1}
+                            beforeUpload={() => false}  //
+                            style={{ width: "100%", }}
+                        >
+                            <Button
+                                style={{ marginTop: "20px", backgroundColor: "black", color: "white" }}
+                                icon={<UploadOutlined />}
+                                className="text-input"
+
+                            >
+                                Import Question
+                            </Button>
+
                         </Upload>
                         <h3 style={headerStyle}>Answer </h3>
 
