@@ -1,22 +1,19 @@
 import React from "react";
-import Login from "./Login";
-import Header from "./components/Header";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import AnswerScreen from "../../../kahootfptu/src/screens/AnswerScreen";
+import WaitingRoomScreen from "./screens/WaitingRoomScreen";
+import AnswerScreen from "./screens/AnswerScreen";
+import UserManagement from "./screens/admin/UserManagement";
 import ListOfParticipantsScreen from "./screens/ListOfParticipantsScreen";
-
 function App() {
   return (
-    <div className="App">
-      <Header />
-      <Router>
-        <Routes>
-          <Route path="/" element={<ListOfParticipantsScreen />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/answer" element={<AnswerScreen />} />
-        </Routes>
-      </Router>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<WaitingRoomScreen />} />
+        <Route path="/question" element={<AnswerScreen />} />
+        <Route path="/waiting" element={<ListOfParticipantsScreen />} />
+        <Route path="/userlist" element={<UserManagement />} />
+      </Routes>
+    </Router>
   );
 }
 
