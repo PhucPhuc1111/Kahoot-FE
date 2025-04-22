@@ -1,142 +1,176 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Typography } from "antd";
 
 const { Title } = Typography;
 
 const answers = [
-  { text: "Answer A", color: "#f06292" },
-  { text: "Answer B", color: "#ba68c8" },
-  { text: "Answer C", color: "#4db6ac" },
-  { text: "Answer D", color: "#ffb74d" },
+  { text: "1888", color: "#ff6f91" }, // Soft coral pink
+  { text: "1905", color: "#ff8da1" }, // Light pink
+  { text: "1912", color: "#f06292" }, // Hot pink
+  { text: "1942", color: "#ffabc1" }, // Blush pink
 ];
 
 const AnswerScreen = () => {
+  const [timeLeft, setTimeLeft] = useState(20);
+  const [score, setScore] = useState(0);
+
+  useEffect(() => {
+    if (timeLeft > 0) {
+      const timer = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [timeLeft]);
+
+  const handleAnswer = (answer) => {
+    setScore((prev) => prev + 10);
+    alert(`You selected: ${answer}`);
+  };
+
   return (
     <div
       style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #ffccd5, #ff85a1)",
-        padding: "16px",
+        width: "100vw",
+        height: "100vh",
+        background: "linear-gradient(135deg, #ffe4e6 0%, #fbcfe8 100%)",
+        padding: "1rem",
+        fontFamily: "'Inter', 'Poppins', sans-serif",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        fontFamily: "'Roboto', sans-serif",
-        position: "relative",
-        overflow: "hidden",
+        justifyContent: "center",
+        boxSizing: "border-box",
+        overflow: "auto",
       }}
     >
-      {/* Background Particles */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      >
-        {[...Array(25)].map((_, i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              width: `${Math.random() * 8 + 4}px`,
-              height: `${Math.random() * 8 + 4}px`,
-              background: "rgba(255, 255, 255, 0.3)",
-              borderRadius: "50%",
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animation: `floatUp ${10 + Math.random() * 10}s linear infinite`,
-              animationDelay: `${Math.random() * 5}s`,
-            }}
-          />
-        ))}
-      </div>
-
+      {/* Question */}
       <Title
         level={2}
         style={{
           textAlign: "center",
-          color: "#ffffff",
-          textShadow: "2px 2px 6px rgba(0, 0, 0, 0.3)",
-          marginBottom: "16px",
-          animation: "pulse 2s infinite",
-          zIndex: 1,
+          color: "#ad1457",
+          margin: "0 0 1.5rem",
+          fontWeight: 700,
+          fontSize: "clamp(1.5rem, 4vw, 2.2rem)",
+          lineHeight: 1.2,
         }}
       >
-        ❓ Choose the correct answer!
+        When did the first cornea transplant take place?
       </Title>
 
+      {/* Timer, Image, Score Container */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          maxWidth: "1400px",
+          marginBottom: "2rem",
+          gap: "1rem",
+          flexWrap: "wrap",
+        }}
+      >
+        {/* Timer */}
+        <div
+          style={{
+            width: "80px",
+            height: "80px",
+            borderRadius: "50%",
+            background: "#ec4899",
+            color: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "1.8rem",
+            fontWeight: 600,
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+            flexShrink: 0,
+          }}
+        >
+          {timeLeft}
+        </div>
+
+        <div
+          style={{
+            minWidth: "300px",
+            width: "400px",
+            height: "250px",
+            borderRadius: "0.75rem",
+            overflow: "hidden",
+            background: "#fce4ec",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+            flexShrink: 0,
+          }}
+        >
+          <img
+            src="https://lienquan.garena.vn/wp-content/uploads/2024/05/ea4408de26b25e684372f0298d838837658d3f256a9ce-2.jpg"
+            alt="Question visual"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        </div>
+
+        {/* Score */}
+        <div
+          style={{
+            minWidth: "120px",
+            padding: "0.75rem",
+            background: "#f06292",
+            color: "#fff",
+            textAlign: "center",
+            borderRadius: "0.75rem",
+            fontWeight: 600,
+            fontSize: "1.2rem",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+            flexShrink: 0,
+          }}
+        >
+          {score}
+          <br />
+          Points
+        </div>
+      </div>
+
+      {/* Answers */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gridTemplateRows: "1fr 1fr",
-          gap: "16px",
+          gridTemplateColumns: "repeat(2, minmax(250px, 1fr))", // 2 cột
+          gridTemplateRows: "repeat(2, auto)", // 2 hàng
+          gap: "1rem",
           width: "100%",
-          maxWidth: "1200px",
-          height: "calc(100vh - 120px)",
-          zIndex: 1,
+          maxWidth: "1400px", // Mở rộng hơn
         }}
       >
         {answers.map((answer, index) => (
           <div
             key={index}
-            onClick={() => alert(`You selected: ${answer.text}`)}
+            onClick={() => handleAnswer(answer.text)}
             style={{
-              background: answer.color,
+              backgroundColor: answer.color,
+              padding: "1.5rem 2rem", // Kéo dài câu trả lời
+              borderRadius: "0.75rem",
               color: "#fff",
-              fontSize: "2.2rem",
-              fontWeight: "bold",
-              borderRadius: "24px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 6px 20px rgba(0, 0, 0, 0.2)",
+              fontWeight: 600,
+              fontSize: "1.5rem",
+              textAlign: "center",
               cursor: "pointer",
-              transition: "transform 0.2s ease",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+              minHeight: "80px", // Đảm bảo chiều cao đồng đều
             }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.transform = "scale(1.03)")
-            }
-            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-4px)";
+              e.currentTarget.style.boxShadow = "0 8px 16px rgba(0, 0, 0, 0.3)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.2)";
+            }}
           >
             {answer.text}
           </div>
         ))}
       </div>
-
-      <style>
-        {`
-          @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-          }
-
-          @keyframes floatUp {
-            0% {
-              transform: translateY(0) translateX(0);
-              opacity: 0.6;
-            }
-            50% {
-              opacity: 0.3;
-            }
-            100% {
-              transform: translateY(-100vh) translateX(${
-                Math.random() * 100 - 50
-              }px);
-              opacity: 0.6;
-            }
-          }
-
-          @media (max-width: 768px) {
-            .answer-grid {
-              grid-template-columns: 1fr;
-              grid-template-rows: repeat(4, 1fr);
-            }
-          }
-        `}
-      </style>
     </div>
   );
 };
