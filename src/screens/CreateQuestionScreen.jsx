@@ -2,6 +2,7 @@ import React, { state, useState, useEffect } from "react";
 import { Input, notification, Upload, Checkbox, Button, Popover } from "antd";
 import { UploadOutlined } from '@ant-design/icons';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import * as XLSX from 'xlsx';
 
 import '../components/CreateQuestion.css';
 
@@ -151,6 +152,32 @@ const CreateQuestion = () => {
         setSavedQuestions(newSavedQuestions);
         console.log("LOG:", newSavedQuestions);
     }
+    const handleChangeImport = (file) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+            const imported = rows.slice(1).map((r, i) => ({
+                id: Date.now() + i,
+                content: r[0] || "",
+                file: null,
+                answers: ["A", "B", "C", "D"].map((opt, j) => ({
+                    id: Date.now() + i + j,
+                    content: r[j + 1] || "",
+                    isAnswer: (r[5]?.toString().trim().toUpperCase() === opt),
+                })),
+            }));
+
+            setSavedQuestions(imported);
+        };
+
+        reader.readAsArrayBuffer(file);
+    };
+
 
     return (
         <div >
@@ -238,7 +265,7 @@ const CreateQuestion = () => {
                         <h3 style={headerStyle}>Upload File </h3>
                         <Upload
                             accept=".pdf, .doc, .png, .jpg, .jpeg"
-                            onChange={(info) => handleImportFile(info.file)}
+                            onChange={(info) => handleChangeFile(info.file)}
                             maxCount={1}
                             beforeUpload={() => false}  //
                             style={{ width: "100%" }}
@@ -254,21 +281,23 @@ const CreateQuestion = () => {
 
                         </Upload>
                         <Upload
-                            accept=".xls, .xl"
-                            onChange={(info) => handleChangeFile(info.file)}
+                            accept=".xls,.xlsx"
+                            onChange={(info) => {
+                                const file = info.fileList[0]?.originFileObj;
+                                if (file) {
+                                    handleChangeImport(file);
+                                }
+                            }}
                             maxCount={1}
-                            beforeUpload={() => false}  //
-                            style={{ width: "100%", }}
+                            beforeUpload={() => false}
                         >
                             <Button
                                 style={{ marginTop: "20px", backgroundColor: "black", color: "white" }}
                                 icon={<UploadOutlined />}
                                 className="text-input"
-
                             >
                                 Import Question
                             </Button>
-
                         </Upload>
                         <h3 style={headerStyle}>Answer </h3>
 
