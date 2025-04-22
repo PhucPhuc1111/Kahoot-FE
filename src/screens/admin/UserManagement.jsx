@@ -11,29 +11,38 @@ import {
   Card,
   Typography,
 } from "antd";
-import {
-  SearchOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  PlusOutlined,
-  TeamOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { SearchOutlined, UserOutlined, LockOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 
 const initialUsers = [
-  { id: 1, name: "Nguyễn Văn A", email: "a@example.com", role: "User" },
-  { id: 2, name: "Trần Thị B", email: "b@example.com", role: "Admin" },
-  { id: 3, name: "Lê Văn C", email: "c@example.com", role: "User" },
+  {
+    id: 1,
+    name: "Nguyễn Văn A",
+    email: "a@example.com",
+    role: "User",
+    isBlocked: false,
+  },
+  {
+    id: 2,
+    name: "Trần Thị B",
+    email: "b@example.com",
+    role: "Admin",
+    isBlocked: false,
+  },
+  {
+    id: 3,
+    name: "Lê Văn C",
+    email: "c@example.com",
+    role: "User",
+    isBlocked: false,
+  },
 ];
 
 const UserManagement = () => {
   const [users, setUsers] = useState(initialUsers);
   const [searchText, setSearchText] = useState("");
   const [filteredUsers, setFilteredUsers] = useState(initialUsers);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -45,39 +54,12 @@ const UserManagement = () => {
     setFilteredUsers(filtered);
   }, [searchText, users]);
 
-  const showEditModal = (user) => {
-    setEditingUser(user);
-    form.setFieldsValue(user);
-    setIsModalVisible(true);
-  };
-
-  const handleCancel = () => {
-    setEditingUser(null);
-    setIsModalVisible(false);
-    form.resetFields();
-  };
-
-  const handleOk = () => {
-    form.validateFields().then((values) => {
-      if (editingUser) {
-        const updatedUsers = users.map((user) =>
-          user.id === editingUser.id ? { ...editingUser, ...values } : user
-        );
-        setUsers(updatedUsers);
-        message.success("Cập nhật người dùng thành công!");
-      } else {
-        const newUser = { id: Date.now(), ...values };
-        setUsers([...users, newUser]);
-        message.success("Thêm người dùng mới thành công!");
-      }
-      handleCancel();
-    });
-  };
-
-  const handleDelete = (id) => {
-    const updated = users.filter((user) => user.id !== id);
+  const handleBlockToggle = (id) => {
+    const updated = users.map((user) =>
+      user.id === id ? { ...user, isBlocked: !user.isBlocked } : user
+    );
     setUsers(updated);
-    message.success("Xóa người dùng thành công!");
+    message.success("User status updated!");
   };
 
   const columns = [
@@ -85,26 +67,35 @@ const UserManagement = () => {
     { title: "Email", dataIndex: "email", key: "email" },
     { title: "Role", dataIndex: "role", key: "role" },
     {
+      title: "Status",
+      dataIndex: "isBlocked",
+      key: "status",
+      render: (isBlocked) => (
+        <Text type={isBlocked ? "danger" : "success"}>
+          {isBlocked ? "Blocked" : "Active"}
+        </Text>
+      ),
+    },
+    {
       title: "Action",
       key: "action",
       width: 150,
       render: (_, record) => (
         <Space>
-          <Button
-            icon={<EditOutlined />}
-            onClick={() => showEditModal(record)}
-            style={{ borderColor: "#ff85a1", color: "#d81b60" }}
-          >
-            Edit
-          </Button>
           <Popconfirm
-            title="Bạn có chắc muốn xóa người dùng này không?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Có"
-            cancelText="Không"
+            title={`Are you sure to ${
+              record.isBlocked ? "unblock" : "block"
+            } this user?`}
+            onConfirm={() => handleBlockToggle(record.id)}
+            okText="Yes"
+            cancelText="No"
           >
-            <Button danger icon={<DeleteOutlined />}>
-              Delete
+            <Button
+              danger={record.isBlocked === false}
+              type={record.isBlocked ? "default" : "primary"}
+              icon={<LockOutlined />}
+            >
+              {record.isBlocked ? "Unblock" : "Block"}
             </Button>
           </Popconfirm>
         </Space>
@@ -152,24 +143,6 @@ const UserManagement = () => {
               Total: <b>{users.length}</b> users
             </Text>
           </div>
-
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            style={{
-              backgroundColor: "#ff4081",
-              borderColor: "#ff4081",
-              fontWeight: "bold",
-              borderRadius: 8,
-            }}
-            onClick={() => {
-              setEditingUser(null);
-              form.resetFields();
-              setIsModalVisible(true);
-            }}
-          >
-            Add New User
-          </Button>
         </div>
       </Card>
 
@@ -203,42 +176,6 @@ const UserManagement = () => {
           pagination={{ pageSize: 5 }}
         />
       </Card>
-
-      <Modal
-        title={editingUser ? "Update User" : "Add New User"}
-        visible={isModalVisible}
-        onOk={handleOk}
-        onCancel={handleCancel}
-        okText="Save"
-        cancelText="Cancel"
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="name"
-            label="Tên"
-            rules={[{ required: true, message: "Please input user name" }]}
-          >
-            <Input prefix={<UserOutlined />} />
-          </Form.Item>
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              { required: true, message: "Please input user email!" },
-              { type: "email", message: "Email is not valid" },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="role"
-            label="Role"
-            rules={[{ required: true, message: "Please choose role!" }]}
-          >
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
 
       <style>
         {`
