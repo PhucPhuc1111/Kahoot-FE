@@ -1,7 +1,7 @@
 import React, { state, useState, useEffect } from "react";
 import { Input, notification, Upload, Checkbox, Button, Popover } from "antd";
 import { UploadOutlined } from '@ant-design/icons';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 import '../components/CreateQuestion.css';
 
@@ -148,45 +148,72 @@ const CreateQuestion = () => {
         <div >
 
             <div style={{ display: "flex" }}>
-                <DragDropContext onDragEnd={(result) => { handleDragEnd(result) }}>
-                    <div style={{
-                        width: "300px",
-                        backgroundColor: "#f7f7f7",
-                        padding: "20px",
-                        borderRadius: "20px",
-                        marginTop: "100px"
-                    }}>
-                        <h2 style={{ color: "black" }}>Saved Questions</h2>
+                <DragDropContext onDragEnd={handleDragEnd}>
+                    <Droppable droppableId="questions" type="group">
+                        {(provided) => (
+                            <div
+                                style={{
+                                    width: "300px",
+                                    backgroundColor: "#f7f7f7",
+                                    padding: "20px",
+                                    borderRadius: "20px",
+                                    marginTop: "100px",
+                                }}
+                            >
+                                <div
+                                    ref={provided.innerRef}
+                                    {...provided.droppableProps}
+                                    style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+                                >
+                                    {savedQuestions.map((q, index) => (
+                                        <Draggable key={q.id.toString()} draggableId={q.id.toString()} index={index}>
+                                            {(dragProvided) => (
+                                                <div
+                                                    ref={dragProvided.innerRef}
+                                                    {...dragProvided.draggableProps}
+                                                    {...dragProvided.dragHandleProps}
+                                                    onClick={() => handleSelectQuestion(q)}
+                                                    className="custom-button"
+                                                    style={{
+                                                        backgroundColor: "#ffffff",
+                                                        padding: "10px",
+                                                        borderRadius: "10px",
+                                                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                                                        cursor: "pointer",
+                                                        color: "black",
+                                                        transition: "all 0.3s ease",
+                                                        ...dragProvided.draggableProps.style,
+                                                    }}
+                                                >
+                                                    {`Question ${index + 1}: ${q.content}`}
+                                                    <br />
+                                                    <Button
+                                                        className="custom-button"
+                                                        size="small"
+                                                        style={{ backgroundColor: "red", color: "white", marginLeft: "10px" }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteQuestion(q.id);
+                                                        }}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </Draggable>
+                                    ))}
 
-                        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                            {savedQuestions.map((q, index) => (
-                                <Draggable key={q.id} index={index} draggableId={q.id}>
-                                    {(provided) => (
-                                        <div ref={provided.innerRef}{...provided.droppableProps}
-                                            onClick={() => handleSelectQuestion(q)}
-                                            className="custom-button"
-                                            style={{
-                                                backgroundColor: "#ffffff",
-                                                padding: "10px",
-                                                borderRadius: "10px",
-                                                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                                                cursor: "pointer",
-                                                color: "black",
-                                                transition: "all 0.3s ease",
-                                            }}>
-                                            {`Question ${index + 1}: ${q.content}`}<br />
-                                            <Button
-                                                className="custom-button"
-                                                size="small"
-                                                style={{ backgroundColor: "red", color: "white", marginLeft: "10px" }}
-                                                onClick={() => handleDeleteQuestion(q.id)}
-                                            >Delete</Button>
-                                        </div>)}
-                                </Draggable>))}
-                            <button className="custom-button" onClick={handleAddQuestion}>+ More Question</button>
-                        </div>
-                    </div>
+                                    {provided.placeholder}
+
+                                    <button className="custom-button" onClick={handleAddQuestion}>
+                                        + More Question
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </Droppable>
                 </DragDropContext>
+
                 < div style={{ margin: "100px", padding: "50px", borderRadius: "30px", backgroundColor: "#f0f2f5" }}>
 
                     <form style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "50px" }}>
