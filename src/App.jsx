@@ -16,7 +16,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/createK" element={<CreateKahoot />} />
-          <Route path="/createQ" element={<CreateQuestion />} />
+          <Route path="/createq/:id" element={<CreateQuestion />} />
           <Route path="/" element={<WaitRoomScreen />} />
           <Route path="/login" element={<Login />} />
           <Route path="/leaderBoard" element={<LeaderBoardScreen />} />

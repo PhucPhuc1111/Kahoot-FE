@@ -177,10 +177,47 @@ const CreateQuestion = () => {
 
         reader.readAsArrayBuffer(file);
     };
+    const handleSaveQuizz = async () => {
+        const quizId = KahootService.getQuizId();
+        if (!quizId) {
+            console.error("Quiz ID not found.");
+            return;
+        }
+
+        // Convert câu hỏi và đáp án thành đúng định dạng body API
+        const formattedQuestions = savedQuestions.map((q) => ({
+            questionText: q.content,
+            timeLimitSec: 30,
+            isRandomAnswer: true,
+            answers: q.answers.map((a) => ({
+                answerText: a.content,
+                isCorrect: a.isAnswer
+            }))
+        }));
+
+        try {
+            await axios.post(
+                `https://fptkahoot-eqebcwg8aya7aeea.southeastasia-01.azurewebsites.net/api/quiz/${quizId}/questions`,
+                formattedQuestions,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Bearer " + KahootService.token,
+                    },
+                }
+            );
+            alert("Quizz và các câu hỏi đã được lưu thành công!");
+        } catch (error) {
+            console.error("Error saving questions:", error);
+            alert("Đã xảy ra lỗi khi lưu câu hỏi.");
+        }
+    }
+
+
 
 
     return (
-        <div >
+        <div style={{ backgroundColor: "pink", fontFamily: "cursive", padding: "20px" }}>
 
             <div style={{ display: "flex" }}>
                 <DragDropContext onDragEnd={handleDragEnd}>
@@ -375,6 +412,24 @@ const CreateQuestion = () => {
                             }
                         >
                             Save Question
+                        </button>
+                        <button
+                            type="button"
+                            className="custom-button"
+                            style={{
+                                marginTop: "20px",
+                                padding: "10px 20px",
+                                borderRadius: "5px",
+                                backgroundColor: "#1890ff",
+                                color: "white",
+                                border: "none",
+                                cursor: "pointer"
+                            }}
+                            onClick={
+                                handleSaveQuizz
+                            }
+                        >
+                            Save Quizz
                         </button>
 
                     </form >        </div >
