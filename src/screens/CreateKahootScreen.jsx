@@ -49,7 +49,7 @@ const CreateKahoot = () => {
             if (quizId) {
                 localStorage.setItem("quizId", quizId.toString());
                 alert("Tạo kahoot thành công!");
-                navigate(`/createq/${quizId}`);
+                navigate(`/createq`);
             } else {
                 alert("Không lấy được ID từ server!");
             }

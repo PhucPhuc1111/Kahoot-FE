@@ -1,21 +1,34 @@
 import React, { state, useState, useEffect } from "react";
-import { Input, notification, Upload, Checkbox, Button, Popover } from "antd";
+import { InputNumber, notification, Upload, Checkbox, Button, Popover } from "antd";
 import { UploadOutlined } from '@ant-design/icons';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import * as XLSX from 'xlsx';
+import { createQuestion } from '../services/createQuestion.js';
 
 import '../components/CreateQuestion.css';
 
 const CreateQuestion = () => {
+    const quizId = localStorage.getItem("quizId");
     const [answers, setAnswers] = useState([{ id: '0', content: "", isAnswer: false }]);
     const [question, setQuestion] = useState({
         id: Date.now(),
         content: "",
         file: null,
         answers: [],
+        timeLimitSec: 30, // Giá trị mặc định 30 giây
     });
 
-    const [savedQuestions, setSavedQuestions] = useState([]);
+    const [savedQuestions, setSavedQuestions] = useState(() => {
+        if (!quizId) return []; // Nếu không có quizId, trả về mảng rỗng
+        const saved = localStorage.getItem(`savedQuestions_${quizId}`);
+        return saved ? JSON.parse(saved) : [];
+    });
+
+    useEffect(() => {
+        if (quizId) {
+            localStorage.setItem(`savedQuestions_${quizId}`, JSON.stringify(savedQuestions));
+        }
+    }, [savedQuestions, quizId]);
     const handleAddAnswer = () => {
         console.log("LOG:", answers);
         if (answers.length >= 4) {
@@ -177,41 +190,67 @@ const CreateQuestion = () => {
 
         reader.readAsArrayBuffer(file);
     };
+    const handleChangeTime = (value) => {
+        setQuestion({ ...question, timeLimitSec: value });
+        console.log("LOG:", question.timeLimitSec);
+    }
+
+
     const handleSaveQuizz = async () => {
-        const quizId = KahootService.getQuizId();
+        const quizId = localStorage.getItem("quizId");
+
         if (!quizId) {
-            console.error("Quiz ID not found.");
+            notification.error({
+                message: 'Lỗi',
+                description: 'Không tìm thấy Quiz ID trong localStorage.',
+                placement: 'topRight'
+            });
             return;
         }
 
-        // Convert câu hỏi và đáp án thành đúng định dạng body API
-        const formattedQuestions = savedQuestions.map((q) => ({
-            questionText: q.content,
-            timeLimitSec: 30,
-            isRandomAnswer: true,
-            answers: q.answers.map((a) => ({
-                answerText: a.content,
-                isCorrect: a.isAnswer
-            }))
-        }));
+        console.log("📌 Quiz ID:", quizId);
+        console.log("📌 Raw savedQuestions:", savedQuestions);
+
+        if (!savedQuestions || savedQuestions.length === 0) {
+            notification.warning({
+                message: 'Cảnh báo',
+                description: 'Bạn chưa có câu hỏi nào!',
+                placement: 'topRight'
+            });
+            return;
+        }
+
+        // Format lại câu hỏi
+        const formattedQuestions = savedQuestions.map((q, index) => {
+            const formatted = {
+                questionText: q.content,
+                timeLimitSec: q.timeLimitSec === undefined ? 30 : q.timeLimitSec, // Sử dụng toán tử điều kiện
+                isRandomAnswer: true,
+                answers: q.answers.map((a) => ({
+                    answerText: a.content,
+                    isCorrect: a.isAnswer
+                })),
+            };
+
+            // In  câu hỏi
+            console.log(`Câu hỏi ${index + 1}:`, JSON.stringify(formatted, null, 2));
+            return formatted;
+        });
+
+
+        console.log("🚀 Sending full formattedQuestions to API:\n", JSON.stringify(formattedQuestions, null, 2));
 
         try {
-            await axios.post(
-                `https://fptkahoot-eqebcwg8aya7aeea.southeastasia-01.azurewebsites.net/api/quiz/${quizId}/questions`,
-                formattedQuestions,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: "Bearer " + KahootService.token,
-                    },
-                }
-            );
-            alert("Quizz và các câu hỏi đã được lưu thành công!");
+            const res = await createQuestion(formattedQuestions);
+            console.log("✅ API Response:", res);
+            alert("Các câu hỏi đã được lưu!");
         } catch (error) {
-            console.error("Error saving questions:", error);
+            console.error("❌ Error saving questions:", error);
             alert("Đã xảy ra lỗi khi lưu câu hỏi.");
         }
-    }
+    };
+
+
 
 
 
@@ -289,7 +328,7 @@ const CreateQuestion = () => {
                 < div style={{ margin: "100px", padding: "50px", borderRadius: "30px", backgroundColor: "#f0f2f5" }}>
 
                     <form style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "50px" }}>
-                        <h1 style={{ color: "black", marginBottom: "50px" }}>Create Question</h1>
+                        <h1>{localStorage.getItem("quizTitle") || "Create Quiz"}</h1>
                         <h3 style={headerStyle}>Question </h3>
 
                         <input
@@ -336,6 +375,27 @@ const CreateQuestion = () => {
                                 Import Question
                             </Button>
                         </Upload>
+                        <h3 style={headerStyle}>Time (second)</h3>
+                        <InputNumber
+                            min={5}
+                            max={120}
+                            defaultValue={30}
+                            value={question.timeLimitSec}
+                            onChange={(value) => handleChangeTime(value)}
+                            style={{
+                                width: '100%',
+                                marginBottom: '20px',
+                                border: '1px solid #d9d9d9',
+                                borderRadius: '5px',
+                                padding: '8px 12px',
+                                fontSize: '16px',
+                            }}
+                            addonAfter="giây" // Hiển thị đơn vị
+                        />
+
+
+
+
                         <h3 style={headerStyle}>Answer </h3>
 
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "center", width: "600px" }}>
